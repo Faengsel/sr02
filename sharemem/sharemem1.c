@@ -1,60 +1,51 @@
 #include "sharemem.h"
 
 int main(){
-    int cpt;
+  int cpt;
 
-    // Initialiser à "1" deux tableaux d'entiers tab1[10] et tab2[10],
-    int tab1[10] = {1}, tab2[10] = {1};
+  int tab1[10] = {1}, tab2[10] = {[0 ... 9]= 1};
+  int shmid = shmget(CLE, 10 * sizeof(int), PROT | IPC_CREAT);
+  void * addr = shmat(shmid, 0, 0); 
 
-    // Créer et attacher un segment de mémoire partagée,
-	int *ptr = shmget();
+  pid_t child = fork();
+  if(child==-1) fprintf(stderr, "Erreur de creation du fils\n");
+  if(child == 0){
+    for(cpt=0;cpt<10;cpt++){tab2[cpt] = 2;}
 
-    // Faire un fork(),
-    pid_t child = fork();
-    if(child==-1) printf(stderr, "Erreur de creation du fils\n");
-    if(child == 0){
-        // Le fils met tab2[] à "2",
-        for(cpt=0;cpt<10;cpt++){tab2[cpt] = 2;}
+    printf("Le fils, tab2[] :  ");
+    for(cpt=0;cpt<10;cpt++){printf("%d ", tab2[cpt]);}
+    printf("\n");
 
-        // Le fils imprime tab2[],
-        printf("Le fils, tab2[] :  ");
-        for(cpt=0;cpt<10;cpt++){printf("%d ", tab2[cpt]);}
-        printf("\n");
 
-        // Le fils copie tab2 dans le segment de mémoire partagée,
-        // --TODO--
+    // Le fils copie tab2 dans le segment de mémoire partagée,
+    // --TODO--
+    memcpy(addr, tab2, 10 * sizeof(int));
 
-        // Le fils se termine,
-        exit(0);
-    }
-    else{
-        // Le père attend 1/2 seconde,
-        usleep(500000);
 
-        // Le père imprime tab2[],
-        printf("Le pere, tab2[] :  ");
-        for(cpt=0;cpt<10;cpt++){printf("%d ", tab2[cpt]);}
-        printf("\n");
+    shmdt(addr);
+  }
+  else{
+    usleep(500000);
 
-        // Le père attend 1/2 seconde,
-        usleep(500000);
+    printf("Le pere, tab2[] :  ");
+    for(cpt=0;cpt<10;cpt++){printf("%d ", tab2[cpt]);}
+    printf("\n");
 
-        // Le père copie le segment de mémoire partagée dans tab2,
-        // --TODO--
+    usleep(500000);
 
-        // Le père imprime tab2[],
-        printf("Le pere, tab2[] :  ");
-        for(cpt=0;cpt<10;cpt++){printf("%d ", tab2[cpt]);}
-        printf("\n");
+    // --TODO--
+    memcpy(tab2, addr, 10 * sizeof(int));
 
-        // Le père fait un wait de la fin du fils,
-        wait();
-        printf("Fin du fils\n");
+    printf("Le pere, tab2[] :  ");
+    for(cpt=0;cpt<10;cpt++){printf("%d ", tab2[cpt]);}
+    printf("\n");
 
-        // Le père détruit le segment de mémoire partagée,
-        // --TODO--
+    wait();
+    printf("Fin du fils\n");
 
-        // Le père se termine.
-        exit(0);
-    }
+    shmdt(addr);
+    shmctl(shmid, IPC_RMID, 0);
+  }
+
+  return 0;
 }

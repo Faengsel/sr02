@@ -9,4 +9,8 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
+#include <string.h>
 #include <fcntl.h>
+
+#define CLE   666
+#define PROT 0666
