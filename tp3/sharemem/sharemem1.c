@@ -71,11 +71,11 @@ void pere (int *tab, void *addr, int shmid) {
 
   // Detruit le segment de memoire partagee
   // une fois que tous les processus s'en
-  // sont detache
+  // sont detaches
   shmctl(shmid, IPC_RMID, 0);
 }
 
-void initialiser_tableau(int *tab, int val, int size) {
+void initialiser_tableau (int *tab, int val, int size) {
   int i;
 
   for (i = 0; i < size; i++) {
