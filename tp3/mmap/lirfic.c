@@ -1,18 +1,34 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
+#include <errno.h>
+
+#include "lirfic.h"
 
 int main() {
-  int nombre, fd, fin;
+  int nombres[BUFFER_SIZE], fd;
+  unsigned int i;
+  ssize_t r;
 
-  fd=open("titi.dat",O_RDWR,0666);
+  if ((fd = open("titi.dat",O_RDWR,0666)) < 0) {
+    fprintf(stderr, "%s", strerror(errno));
+    return -1;
+  }
 
-  fin = read(fd, &nombre, sizeof(int));
+  while ((r = read(fd, &nombres, BUFFER_SIZE * sizeof(int))) > 0) {
+    printf("%ld bytes read\n", r);
+    for (i = 0; i < (r / sizeof(int)); i++) {
+      printf("%d ", nombres[i]);
+    }
+  }
 
-  while( fin != 0){
-    printf("%d ", nombre);
+  printf("\n");
 
-    fin = read(fd, &nombre, sizeof(int));
+  if (r < 0) {
+    fprintf(stderr, "%s", strerror(errno));
+    close(fd);
+    return -1;
   }
 
   close(fd);
