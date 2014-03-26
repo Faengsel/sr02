@@ -1,51 +1,92 @@
 #include "sharemem.h"
 
 int main(){
-  int cpt;
+  int tab[10];
+  initialiser_tableau(tab, 1, 10);
 
-  int tab1[10] = {1}, tab2[10] = {[0 ... 9]= 1};
-  int shmid = shmget(CLE, 10 * sizeof(int), PROT | IPC_CREAT);
-  void * addr = shmat(shmid, 0, 0); 
+  int shmid;
+  void * addr;
+
+  if ((shmid = shmget(CLE, 10 * sizeof(int), PROT | IPC_CREAT)) < 0 ||
+      (addr = shmat(shmid, 0, 0)) < 0) {
+
+    fprintf(stderr, "%s", strerror(errno));
+    return -1;
+  }
 
   pid_t child = fork();
-  if(child==-1) fprintf(stderr, "Erreur de creation du fils\n");
-  if(child == 0){
-    for(cpt=0;cpt<10;cpt++){tab2[cpt] = 2;}
 
-    printf("Le fils, tab2[] :  ");
-    for(cpt=0;cpt<10;cpt++){printf("%d ", tab2[cpt]);}
-    printf("\n");
-
-
-    // Le fils copie tab2 dans le segment de mémoire partagée,
-    // --TODO--
-    memcpy(addr, tab2, 10 * sizeof(int));
-
-
-    shmdt(addr);
-  }
-  else{
-    usleep(500000);
-
-    printf("Le pere, tab2[] :  ");
-    for(cpt=0;cpt<10;cpt++){printf("%d ", tab2[cpt]);}
-    printf("\n");
-
-    usleep(500000);
-
-    // --TODO--
-    memcpy(tab2, addr, 10 * sizeof(int));
-
-    printf("Le pere, tab2[] :  ");
-    for(cpt=0;cpt<10;cpt++){printf("%d ", tab2[cpt]);}
-    printf("\n");
-
-    wait();
-    printf("Fin du fils\n");
-
-    shmdt(addr);
-    shmctl(shmid, IPC_RMID, 0);
+  switch (child) {
+    case -1:
+      fprintf(stderr, "%s", strerror(errno));
+      return -1;
+    case 0: // processus fils
+      fils(tab, addr);
+      break;
+    default: // processus pere
+      pere(tab, addr, shmid);
+      break;
   }
 
   return 0;
+}
+
+void fils (int *tab, void *addr) {
+  // Change les valeurs du tableau
+  // dans la memoire du processus fils
+  initialiser_tableau(tab, 2, 10);
+
+  printf("Le fils, tab2[] :  ");
+  afficher_tableau(tab, 10);
+
+  // Copie le tableau modifie dans le
+  // segment memoire partage
+  memcpy(addr, tab, 10 * sizeof(int));
+
+  shmdt(addr);
+}
+
+void pere (int *tab, void *addr, int shmid) {
+  usleep(500000);
+
+  printf("Le pere, tab2[] :  ");
+  // Affiche la valeur initiale du tableau
+  // car le processus pere n'a pas encore
+  // recupere les modifications apportees
+  // par le processus fils
+  afficher_tableau(tab, 10);
+
+  usleep(500000);
+
+  // Recupere les modifications
+  memcpy(tab, addr, 10 * sizeof(int));
+
+  printf("Le pere, tab2[] :  ");
+  // affiche les nouvelles valeurs
+  afficher_tableau(tab, 10);
+
+  wait();
+
+  shmdt(addr);
+
+  // Detruit le segment de memoire partagee
+  // une fois que tous les processus s'en
+  // sont detache
+  shmctl(shmid, IPC_RMID, 0);
+}
+
+void initialiser_tableau(int *tab, int val, int size) {
+  int i;
+
+  for (i = 0; i < size; i++) {
+    tab[i] = val;
+  }
+}
+
+void afficher_tableau (const int *tab, int size) {
+  int cpt;
+  for (cpt = 0; cpt < size; cpt++) {
+    printf("%d ", tab[cpt]);
+  }
+  printf("\n");
 }
