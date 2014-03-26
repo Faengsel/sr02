@@ -4,6 +4,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include "common.h"
 #include "lirfic.h"
 
 int main() {
@@ -11,7 +12,7 @@ int main() {
   unsigned int i;
   ssize_t r;
 
-  if ((fd = open("titi.dat",O_RDWR,0666)) < 0) {
+  if ((fd = open(FILENAME,O_RDWR,0666)) < 0) {
     fprintf(stderr, "%s", strerror(errno));
     return -1;
   }

@@ -1,11 +1,13 @@
 #include "../sharemem/sharemem.h"
 
+#include "common.h"
+
 int main() {
   int tab1[10] = {11,22,33,44,55,66,77,88,99,1000};
   int fd;
   ssize_t w;
 
-  if ((fd = open("titi.dat",O_RDWR|O_CREAT|O_TRUNC,0666)) < 0) {
+  if ((fd = open(FILENAME,O_RDWR|O_CREAT|O_TRUNC,0666)) < 0) {
     fprintf(stderr, "%s", strerror(errno));
     return -1;
   }

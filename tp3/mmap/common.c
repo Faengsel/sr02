@@ -7,11 +7,14 @@
 
 #include "common.h"
 
-ssize_t projeter_fichier (const char * filename, void ** projection) {
+ssize_t projeter_fichier (const char * filename, void ** projection, int prot) {
   int fd; 
   size_t taille_fichier;
   struct stat etat_fichier;
 
+  // Recupere un descripteur sur le fichier ainsi
+  // que sa taille afin de pouvoir le projeter
+  // en memoire
   if ((fd = open(filename, O_RDWR)) < 0) {
     perror("open");
     return -1;
@@ -24,7 +27,11 @@ ssize_t projeter_fichier (const char * filename, void ** projection) {
 
   taille_fichier = etat_fichier.st_size;
 
-  *projection = (int *) mmap(NULL, taille_fichier, PROT_READ | PROT_WRITE, 
+  // MAP_SHARED permet de partager le segment memoire,
+  // les modifications apportees sont ainsi visibles
+  // immediatement par tout processus partageant ce
+  // segment memoire
+  *projection = (int *) mmap(NULL, taille_fichier, prot, 
                             MAP_SHARED, fd, 0);
   if (*projection == (int *) MAP_FAILED) {
     perror("mmap");
@@ -36,6 +43,8 @@ ssize_t projeter_fichier (const char * filename, void ** projection) {
   return taille_fichier;
 }
 
+// Appelle la fonction "func" tant que l'utilisateur n'a pas
+// rentree 99 et que la projection n'a pas ete entierement lue
 void tq_different_99 (int * projection, size_t taille_fichier,
                       void (*func)(int * projection, size_t taille)) 
 {
