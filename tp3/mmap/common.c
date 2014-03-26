@@ -36,4 +36,20 @@ ssize_t projeter_fichier (const char * filename, void ** projection) {
   return taille_fichier;
 }
 
+void tq_different_99 (int * projection, size_t taille_fichier,
+                      void (*func)(int * projection, size_t taille)) 
+{
+  unsigned int i = 0; 
+  int n;
 
+  printf("Entrez un nombre (99 pour quitter): ");
+  scanf("%d", &n);
+
+  while (n != 99 && i < taille_fichier / sizeof(int)) {
+    func(projection, taille_fichier);
+    printf("Entrez un nombre (99 pour quitter): ");
+    scanf("%d", &n);
+
+    i++;
+  } 
+}

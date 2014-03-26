@@ -7,32 +7,25 @@
 
 #include "common.h"
 
+void afficher_projection (int * projection, size_t taille_fichier) {
+  unsigned int i;
+
+  for (i = 0; i < taille_fichier / sizeof(int); i++) {
+    printf("%d ", projection[i]);
+  }
+  printf("\n");
+}
+
 int main () {
   int * projection;
   ssize_t taille_fichier;
-  unsigned int i;
-  int n, j;
 
   taille_fichier = projeter_fichier(FILENAME, (void **)&projection);
   if (taille_fichier < 0) {
     return -1;
   }
 
-  i = 0;
-  printf("Entrez un nombre (99 pour quitter): ");
-  scanf("%d", &n);
-  while (n != 99 && i < taille_fichier / sizeof(int)) {
-    for (j = 0; j < taille_fichier / sizeof(int); j++) {
-      printf("%d ", projection[j]);
-    }
-    printf("\n");
-
-    printf("Entrez un nombre (99 pour quitter): ");
-    scanf("%d", &n);
-
-    i++;
-  } 
-
+  tq_different_99(projection, taille_fichier, afficher_projection);
   munmap((void *)projection, taille_fichier);
 
   return 0;
