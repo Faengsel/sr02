@@ -9,7 +9,7 @@ int main(){
 
 
 	// Création d'un segment dans la table globale des seg de mem partagée et gestion erreurs
-	shmid = shmget(CLE, sizeof(tab2), 0200|IPC_CREAT);	// Droits: ecriture owner
+	shmid = shmget(CLE, sizeof(tab2), 0600|IPC_CREAT);	// Droits: ecriture+lecture owner
 	if(shmid == -1){perror("Creation du segment partage echoue");exit(1);}
 
 	// Attachement en mode auto au segment de données du processus

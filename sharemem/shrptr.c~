@@ -13,7 +13,7 @@ int main(){
 	if(shmid == -1){perror("Creation du segment partage echoue");exit(1);}
 
 	// Attachement en mode auto au segment de données du processus
-	addr = shmat(shmid, (void*)12345676, 0); 
+	addr = shmat(shmid, 0, 0); 
 	if(*addr == (int*)-1){perror("Attachement du segment echoue");exit(1);}
 	
 	// Init du tableau de pointeur - il faut remettre les adresses correctement car chgt de zone mem virtuelle

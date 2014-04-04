@@ -7,9 +7,8 @@ int main(){
 	int **addr;			// Adresse virtuelle dans le processus de la zonne partagée (int* imposé)
 
 	
-	// Création d'un segment dans la table globale des seg de mem partagée et gestion erreurs
-	int taille = 5*sizeof(int**) + 5*3*sizeof(int);
-	shmid = shmget(CLE, taille, 0400); // Droits: lecture owner
+	// Recuperer le segment dans la table globale des seg de mem partagée
+	shmid = shmget(CLE, 0, 0400); // Droits: lecture owner
 	if(shmid == -1){perror("Creation du segment partage echoue");exit(1);}
 
 	// Attachement en mode auto au segment de données du processus
