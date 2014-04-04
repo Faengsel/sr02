@@ -1,0 +1,12 @@
+Q1:
+tab2[] est un tableau local à chaque programme. Lors du fork, il y a duplication des variables locales qui sont ainsi séparéeset independantes.
+Ce n'est qu'une fois que le père à copié les données depuis la mémoire partagée vers son tableau local que celui-ci contient des valeurs identiques à celui du fils.
+
+Q2:
+Il ne faut pas oublier qu'il n'y a certe qu'un seul emplacement en mémoire physique alloué, mais celui-ci ne peut être utilisé qu'en étant attaché à une zonne dans la mémoire virtuelle de chaque processus.
+Ainsi, lorsque shmat nous retourne l'adresse de début de notre tableau de pointeur, nous pouvons d'ores et déja voir dans l'affichage que les adresses ne correspondent pas.
+De même, les adresses que nous avons précédement stockées dans le tableau sont celles propres à la mémoire virtuelle du processus shrptr. Et c'est pourquoi nous obtenons un segmentation fault lorsque 
+nous tentons de les utiliser telles quelles dans shrpte. 
+
+Pour remedier à ce problème, il suffit de spécifier à shmat une adresse spécifique commune d'attachement, ou alors de recalculer les déplacement dans notre tavleau de pointeurs pour pointer vers les vecteurs.
+Nous avons choisi de recalculer les deplacement dans shrpte en remettant la même boucle qui initialise le tableau de pointeur.
