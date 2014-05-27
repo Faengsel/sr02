@@ -2,6 +2,8 @@
 #include <sys/shm.h>
 #include <stdlib.h>
 
+#include "sem_pv.h"
+
 int main(){
 	int a; 				// Variable de l'énoncé
 	int cpt;			// Pour les boucles etc..
@@ -24,6 +26,12 @@ int main(){
 	// Initialisation de l'entier "E" à 0
 	*addr = 0;
 	
+	// Créer semaphore
+	if(init_semaphore() < 0){perror("Erreur creation semaphore");exit(1);}
+	
+	// Init à 1
+	 if(val_sem(0, 1) < 0){perror("Erreur initialisation semaphore");exit(1);}
+	
 
 	// --------- FILS ---------	
 	if(child == 0){
@@ -32,10 +40,12 @@ int main(){
 
 		for(cpt=0;cpt<100;cpt++){
 			/* SECTION CRITIQUE */
+			P(0);
 			a = *addr;
 			usleep(20+rand()%80);
 			a++;
 			*addr = a;
+			V(0);
 			/* FIN SECTION CRITIQUE */
 
 			usleep(20+rand()%80);
@@ -53,10 +63,12 @@ int main(){
 
 		for(cpt=0;cpt<100;cpt++){
 			/* SECTION CRITIQUE */
+			P(0);
 			a = *addr;
 			usleep(20+rand()%80);
 			a++;
 			*addr = a;
+			V(0);
 			/* FIN SECTION CRITIQUE */
 
 			usleep(20+rand()%80);
@@ -66,6 +78,9 @@ int main(){
 		wait();
 		printf("A la fin E= %d\n", *addr);
 		
+		// Destruction
+		detruire_semaphore();
+
 		// Détachement et suppression du segment
 		shmdt(addr);
 		shmctl(shmid, IPC_RMID, 0);
